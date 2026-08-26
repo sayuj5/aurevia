@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+:root {
+  --background: 60 56% 91%;
+  --foreground: 188 24% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 188 24% 14%;
+  --primary: 173 25% 39%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 40 25% 91%;
+  --muted-foreground: 185 12% 28%;
+  --border: 40 21% 83%;
+  --input: 40 21% 83%;
+  --ring: 173 25% 39%;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+}
+
+@theme {
+  --color-paper: #F5F5DC;
+  --color-paper-dim: #EFEBE2;
+  --color-ink: #1C2B2D;
+  --color-ink-soft: #3E4E4F;
+  --color-sage: #4A7C74;
+  --color-sage-light: #8A9B8E;
+  --color-terracotta: #C97B4A;
+  --color-brick: #B33A3A;
+  --color-border: #DCD6C8;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-sage);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
