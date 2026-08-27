@@ -1,16 +1,13 @@
-import { useAuthStore, type AuthUser, type UserRole } from '../store/useAuthStore'
-import type { ReactNode } from 'react'
+import { useStore } from '../store/useStore'
 
-export type { AuthUser, UserRole }
-
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   return children
 }
 
 export function useAuth() {
-  const user = useAuthStore((state) => state.user)
-  const login = useAuthStore((state) => state.login)
-  const logout = useAuthStore((state) => state.logout)
+  const user = useStore((state) => state.user)
+  const login = useStore((state) => state.login)
+  const logout = useStore((state) => state.logout)
 
   return { user, login, logout }
 }

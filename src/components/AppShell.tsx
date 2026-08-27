@@ -13,12 +13,12 @@ import {
 import { useAuth } from '../lib/auth'
 import { mockNotifications } from '../data/mockUsers'
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Triage Queue', icon: LayoutDashboard },
-  { to: '/cases', label: 'Case Management', icon: FolderKanban },
-  { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/map', label: 'Incident Map', icon: Map },
-  { to: '/notifications', label: 'Notifications', icon: Bell },
-  { to: '/admin', label: 'Admin', icon: ShieldCheck },
+  { to: '/dashboard', label: 'Triage Queue', icon: LayoutDashboard, roles: ['counselor', 'police', 'admin'] },
+  { to: '/cases', label: 'Case Management', icon: FolderKanban, roles: ['counselor', 'police', 'admin'] },
+  { to: '/analytics', label: 'Analytics', icon: BarChart3, roles: ['counselor', 'police', 'admin'] },
+  { to: '/map', label: 'Incident Map', icon: Map, roles: ['counselor', 'police', 'admin'] },
+  { to: '/notifications', label: 'Notifications', icon: Bell, roles: ['counselor', 'police', 'admin'] },
+  { to: '/admin', label: 'Admin', icon: ShieldCheck, roles: ['admin'] },
 ]
 
 export function AppShell() {
@@ -63,7 +63,7 @@ export function AppShell() {
           )}
         </div>
         <nav className="flex-1 px-3 flex flex-col gap-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          {NAV_ITEMS.filter((item) => user?.role && item.roles.includes(user.role)).map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
