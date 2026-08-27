@@ -24,7 +24,7 @@ export default function App() {
           <Route path="/login" element={<PatientLogin />} />
           <Route path="/register" element={<PatientRegister />} />
 
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute allowedRoles={['counselor', 'police', 'admin']} />}>
             <Route element={<AppShell />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/cases" element={<CaseManagement />} />
@@ -32,7 +32,12 @@ export default function App() {
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/map" element={<MapView />} />
               <Route path="/notifications" element={<Notifications />} />
-              <Route path="/admin" element={<Admin />} />
+            </Route>
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route element={<AppShell />}>
+                <Route path="/admin" element={<Admin />} />
             </Route>
           </Route>
         </Routes>

@@ -10,20 +10,32 @@ export function PatientLogin() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  // ProtectedRoute passes the page a staff member was trying to reach via
-  // location state; citizens arriving straight from Landing have no state,
-  // so they fall through to the assessment flow as before.
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !password) {
       setError('Enter your email and password to continue.')
       return
     }
+
+    const normalizedEmail = email.trim().toLowerCase()
+    let role: 'counselor' | 'police' | 'admin' | 'citizen' = 'citizen'
+
+    if (normalizedEmail === 's.kulkarni@aurevia.org') role = 'counselor'
+    else if (normalizedEmail === 'r.singh@aurevia.org') role = 'police'
+    else if (normalizedEmail === 'p.joshi@aurevia.org') role = 'admin'
+
     // Placeholder for POST /api/v1/auth/login — issues a JWT per the
     // OAuth2 + JWT spec in the backend docs. Swap this in once live.
-    const authenticatedUser = login(email, password)
+    login(normalizedEmail, role)
+
+    if (role === 'citizen') {
+      navigate('/assessment', { replace: true })
+      return
+    }
+
     const requestedPath = (location.state as { from?: string } | null)?.from
-    const redirectTo = authenticatedUser.role === 'citizen' ? '/assessment' : requestedPath?.startsWith('/dashboard') ? requestedPath : '/dashboard'
+    const redirectTo = requestedPath?.startsWith('/dashboard') || requestedPath?.startsWith('/admin') ? requestedPath : '/dashboard'
     navigate(redirectTo, { replace: true })
   }
 

@@ -21,7 +21,7 @@ export function PatientRegister() {
     }
     // Placeholder for POST /api/v1/auth/register — creates the account and
     // issues a JWT per the OAuth2 + JWT spec in the backend docs.
-    login(form.email, form.password)
+    login(form.email, 'citizen')
     navigate('/assessment')
   }
 

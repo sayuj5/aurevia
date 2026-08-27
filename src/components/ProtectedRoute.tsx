@@ -1,20 +1,27 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useAuthStore } from '../store/useAuthStore'
+import { useStore } from '../store/useStore'
+
+type AllowedRole = 'counselor' | 'police' | 'admin' | 'citizen'
+
+interface ProtectedRouteProps {
+  allowedRoles?: AllowedRole[]
+}
 
 // Gates every staff route (dashboard, cases, analytics, map, notifications,
 // admin) behind the same /login screen used for the citizen check-in flow.
 // No second login UI is added — per Bhumika's task card ("Protected routes")
 // this just wires the existing session check in front of AppShell.
-export function ProtectedRoute() {
-  const { user, isAuthenticated } = useAuthStore()
+export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  const user = useStore((state) => state.user)
+  const isAuthenticated = useStore((state) => state.isAuthenticated)
   const location = useLocation()
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
 
-  if (user.role !== 'counselor' && user.role !== 'police') {
-    return <Navigate to="/assessment" replace />
+  if (allowedRoles && (!user.role || !allowedRoles.includes(user.role))) {
+    return <Navigate to={user.role === 'citizen' ? '/assessment' : '/dashboard'} replace />
   }
 
   return <Outlet />
