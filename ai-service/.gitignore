@@ -1,0 +1,12 @@
+venv/
+venv2/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+
+.venv/
+data/
+*.wav
+*.mp3
+*.ogg

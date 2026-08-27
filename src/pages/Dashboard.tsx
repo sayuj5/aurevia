@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, TrendingUp, TrendingDown, Minus, MapPin, Languages, Bell } from 'lucide-react'
+import { ArrowLeft, TrendingUp, TrendingDown, Minus, MapPin, Languages, Bell, Circle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { fetchCases, tierMeta, type Tier } from '../api/cases'
 import { TideLine } from '../components/TideLine'
 import { useTriageWebSocket } from '../hooks/useTriageWebSocket'
+import { useStore } from '../store/useStore'
 
 const trendHistory = [
   { t: 'Mon', score: 38 },
@@ -20,19 +21,31 @@ const trendHistory = [
 const TrendIcon = { rising: TrendingUp, falling: TrendingDown, flat: Minus }
 
 export function Dashboard() {
-  useTriageWebSocket()
+  const liveStatus = useTriageWebSocket()
   const [filter, setFilter] = useState<Tier | 'all'>('all')
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { data: cases = [], isLoading, isError } = useQuery({
+
+  // TanStack Query owns the initial fetch (placeholder for GET /api/v1/distress/cases).
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['cases'],
     queryFn: fetchCases,
   })
+
+  // The Zustand store is the single shared source of truth after that —
+  // Case Management reads/writes the same `cases` array, so edits made
+  // there (status, assignee) show up here too, and vice versa.
+  const cases = useStore((s) => s.cases)
+  const setCases = useStore((s) => s.setCases)
+
+  useEffect(() => {
+    if (data) setCases(data)
+  }, [data, setCases])
 
   const filtered = filter === 'all' ? cases : cases.filter((c) => c.tier === filter)
   const selected = cases.find((c) => c.id === selectedId) ?? cases[0]
   const alertCount = cases.filter((c) => c.awaitingReview).length
 
-  if (isLoading) {
+  if (isLoading || cases.length === 0) {
     return (
       <div className="min-h-screen bg-[var(--color-paper)] flex items-center justify-center">
         <p className="text-sm text-[var(--color-ink-soft)]">Loading case queue...</p>
@@ -57,14 +70,25 @@ export function Dashboard() {
           </Link>
           <span className="font-display text-lg">Case Triage Queue</span>
         </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-brick)]">
-          <Bell className="w-4 h-4" />
-          {alertCount} awaiting review
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 text-xs text-[var(--color-ink-soft)]">
+            <Circle
+              className={`w-2 h-2 ${
+                liveStatus === 'live'
+                  ? 'fill-[var(--color-sage)] text-[var(--color-sage)]'
+                  : 'fill-[var(--color-ink-soft)] text-[var(--color-ink-soft)]'
+              }`}
+            />
+            {liveStatus === 'live' ? 'Live' : liveStatus === 'connecting' ? 'Connecting…' : 'Offline — showing cached data'}
+          </span>
+          <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-brick)]">
+            <Bell className="w-4 h-4" />
+            {alertCount} awaiting review
+          </div>
         </div>
       </header>
 
       <div className="grid lg:grid-cols-[380px_1fr] gap-0 lg:h-[calc(100vh-65px)]">
-        {/* Case list */}
         <div className="border-r border-[var(--color-border)] flex flex-col overflow-hidden">
           <div className="flex gap-1 p-3 border-b border-[var(--color-border)] overflow-x-auto">
             {(['all', 'critical', 'high', 'moderate', 'low'] as const).map((t) => (
@@ -84,6 +108,7 @@ export function Dashboard() {
 
           <div className="overflow-y-auto flex-1">
             {filtered
+              .slice()
               .sort((a, b) => b.score - a.score)
               .map((c) => {
                 const Icon = TrendIcon[c.trend]
@@ -110,7 +135,6 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Detail panel */}
         <div className="overflow-y-auto p-6 md:p-10">
           <div className="flex items-start justify-between mb-6">
             <div>

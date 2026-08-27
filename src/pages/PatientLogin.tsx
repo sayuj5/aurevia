@@ -1,32 +1,32 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ShieldCheck } from 'lucide-react'
-import { useAuth } from '../lib/auth'
+import { useStore } from '../store/useStore'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 
 export function PatientLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const { login } = useAuth()
+  const login = useStore((state) => state.login)
   const navigate = useNavigate()
-  const location = useLocation()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password) {
-      setError('Enter your email and password to continue.')
+    if (!email) {
+      setError('Enter your email to continue.')
       return
     }
 
     const normalizedEmail = email.trim().toLowerCase()
-    let role: 'counselor' | 'police' | 'admin' | 'citizen' = 'citizen'
+    let role: 'counselor' | 'police' | 'citizen' = 'citizen'
 
     if (normalizedEmail === 's.kulkarni@aurevia.org') role = 'counselor'
     else if (normalizedEmail === 'r.singh@aurevia.org') role = 'police'
-    else if (normalizedEmail === 'p.joshi@aurevia.org') role = 'admin'
 
-    // Placeholder for POST /api/v1/auth/login — issues a JWT per the
-    // OAuth2 + JWT spec in the backend docs. Swap this in once live.
     login(normalizedEmail, role)
 
     if (role === 'citizen') {
@@ -34,67 +34,70 @@ export function PatientLogin() {
       return
     }
 
-    const requestedPath = (location.state as { from?: string } | null)?.from
-    const redirectTo = requestedPath?.startsWith('/dashboard') || requestedPath?.startsWith('/admin') ? requestedPath : '/dashboard'
-    navigate(redirectTo, { replace: true })
+    navigate('/dashboard', { replace: true })
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-paper)] flex flex-col items-center justify-center px-6">
-      <Link to="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_15%_20%,rgba(170,200,178,0.28),transparent_45%),radial-gradient(circle_at_85%_10%,rgba(168,132,120,0.2),transparent_35%),linear-gradient(180deg,#f7f2ec_0%,#efe7de_100%)] flex flex-col items-center justify-center px-6 py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.25)_1px,transparent_1px)] bg-[size:34px_34px] opacity-45" />
+
+      <Link to="/" className="absolute top-6 left-6 z-10 flex items-center gap-2 text-sm text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
 
-      <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2 justify-center mb-8">
-          <ShieldCheck className="w-6 h-6 text-[var(--color-sage)]" />
-          <span className="font-display text-xl">Welcome back</span>
-        </div>
-
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--color-border)] bg-white/60 p-6 flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--color-sage)] outline-none"
-            />
+      <Card className="relative z-10 w-full max-w-md border-white/70 bg-white/80 shadow-[0_24px_80px_rgba(52,37,28,0.12)] backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2 justify-center">
+            <ShieldCheck className="w-6 h-6 text-[var(--color-sage)]" />
+            <span className="font-display text-xl">Welcome back</span>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--color-sage)] outline-none"
-            />
-          </div>
+          <CardTitle className="pt-3 text-center text-xs tracking-[0.12em] uppercase text-[var(--color-ink-soft)]/90">
+            Secure patient portal access
+          </CardTitle>
+        </CardHeader>
 
-          {error && <p className="text-xs text-[var(--color-brick)]">{error}</p>}
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="login-email">Email</Label>
+              <Input
+                id="login-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="login-password">Password</Label>
+              <Input
+                id="login-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
 
-          <button
-            type="submit"
-            className="bg-[var(--color-ink)] text-white py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-sage)] transition-colors mt-2"
-          >
-            Sign in
-          </button>
+            {error && <p className="text-xs text-[var(--color-brick)]">{error}</p>}
 
-          <p className="text-center text-xs text-[var(--color-ink-soft)]">
-            First time here?{' '}
-            <Link to="/register" className="text-[var(--color-sage)] font-medium">
-              Create an account
-            </Link>
+            <Button type="submit" className="mt-2">Sign in</Button>
+
+            <p className="text-center text-xs text-[var(--color-ink-soft)]">
+              First time here?{' '}
+              <Link to="/register" className="text-[var(--color-sage)] font-medium">
+                Create an account
+              </Link>
+            </p>
+          </form>
+
+          <p className="text-center text-xs text-[var(--color-ink-soft)] mt-6">
+            Your account is used only to protect your check-in history. It's
+            never shared or shown to anyone outside your support team.
           </p>
-        </form>
+        </CardContent>
+      </Card>
 
-        <p className="text-center text-xs text-[var(--color-ink-soft)] mt-6">
-          Your account is used only to protect your check-in history. It's
-          never shared or shown to anyone outside your support team.
-        </p>
-      </div>
     </div>
   )
 }

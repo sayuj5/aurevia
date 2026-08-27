@@ -1,10 +1,18 @@
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Sparkles } from 'lucide-react'
-import { mockCases, tierMeta } from '../data/mockCases'
+import { tierMeta } from '../data/mockCases'
+import { useStore } from '../store/useStore'
 
 export function ReportView() {
   const { id } = useParams()
-  const c = mockCases.find((c) => c.id === id) ?? mockCases[0]
+  // Reads from the same shared store as Dashboard/Case Management, so a
+  // live score update or status change is reflected here too.
+  const cases = useStore((s) => s.cases)
+  const c = cases.find((c) => c.id === id) ?? cases[0]
+
+  if (!c) {
+    return <div className="p-10 text-sm text-[var(--color-ink-soft)]">Loading report…</div>
+  }
   const maxContribution = Math.max(...c.featureAttribution.map((f) => f.contribution))
 
   return (

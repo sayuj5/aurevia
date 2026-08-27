@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
 
 export function PatientRegister() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
@@ -39,49 +42,44 @@ export function PatientRegister() {
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-[var(--color-border)] bg-white/60 p-6 flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1.5">Name</label>
-            <input
+            <Label htmlFor="reg-name">Name</Label>
+            <Input
+              id="reg-name"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--color-sage)] outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Email</label>
-            <input
+            <Label htmlFor="reg-email">Email</Label>
+            <Input
+              id="reg-email"
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--color-sage)] outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Password</label>
-            <input
+            <Label htmlFor="reg-password">Password</Label>
+            <Input
+              id="reg-password"
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--color-sage)] outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">Confirm password</label>
-            <input
+            <Label htmlFor="reg-confirm">Confirm password</Label>
+            <Input
+              id="reg-confirm"
               type="password"
               value={form.confirm}
               onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--color-sage)] outline-none"
             />
           </div>
 
           {error && <p className="text-xs text-[var(--color-brick)]">{error}</p>}
 
-          <button
-            type="submit"
-            className="bg-[var(--color-ink)] text-white py-2.5 rounded-full text-sm font-medium hover:bg-[var(--color-sage)] transition-colors mt-2"
-          >
-            Create account
-          </button>
+          <Button type="submit" className="mt-2">Create account</Button>
         </form>
 
         <p className="text-center text-xs text-[var(--color-ink-soft)] mt-6">

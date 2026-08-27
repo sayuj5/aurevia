@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { FileText } from 'lucide-react'
-import { mockCases, tierMeta, type CaseRecord } from '../data/mockCases'
+import { fetchCases, tierMeta, type CaseRecord } from '../api/cases'
 import { mockUsers } from '../data/mockUsers'
+import { useStore } from '../store/useStore'
 
 const statusMeta: Record<CaseRecord['status'], { label: string; className: string }> = {
   open: { label: 'Open', className: 'bg-[var(--color-terracotta)]/15 text-[var(--color-terracotta)]' },
@@ -11,16 +13,20 @@ const statusMeta: Record<CaseRecord['status'], { label: string; className: strin
 }
 
 export function CaseManagement() {
-  const [cases, setCases] = useState(mockCases)
+  const { data } = useQuery({ queryKey: ['cases'], queryFn: fetchCases })
+
+  // Same shared store the Dashboard reads from — editing status/assignee
+  // here is immediately visible on the Dashboard too, and vice versa.
+  const cases = useStore((s) => s.cases)
+  const setCases = useStore((s) => s.setCases)
+  const updateStatus = useStore((s) => s.updateCaseStatus)
+  const updateAssignee = useStore((s) => s.updateCaseAssignee)
+
+  useEffect(() => {
+    if (data) setCases(data)
+  }, [data, setCases])
+
   const counsellors = mockUsers.filter((u) => u.role !== 'Admin')
-
-  const updateStatus = (id: string, status: CaseRecord['status']) => {
-    setCases((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)))
-  }
-
-  const updateAssignee = (id: string, assignedTo: string) => {
-    setCases((prev) => prev.map((c) => (c.id === id ? { ...c, assignedTo: assignedTo || null } : c)))
-  }
 
   return (
     <div className="p-6 md:p-10">

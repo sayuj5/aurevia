@@ -24,7 +24,7 @@ export default function App() {
           <Route path="/login" element={<PatientLogin />} />
           <Route path="/register" element={<PatientRegister />} />
 
-          <Route element={<ProtectedRoute allowedRoles={['counselor', 'police', 'admin']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['counselor', 'police']} />}>
             <Route element={<AppShell />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/cases" element={<CaseManagement />} />

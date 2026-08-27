@@ -1,5 +1,6 @@
+import { useEffect } from 'react'
 import { useStore } from '../store/useStore';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   FolderKanban,
@@ -10,6 +11,7 @@ import {
   LogOut,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import { mockNotifications } from '../data/mockUsers'
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Triage Queue', icon: LayoutDashboard, roles: ['counselor', 'police', 'admin'] },
   { to: '/cases', label: 'Case Management', icon: FolderKanban, roles: ['counselor', 'police', 'admin'] },
@@ -21,10 +23,20 @@ const NAV_ITEMS = [
 
 export function AppShell() {
   const notifications = useStore((state) => state.notifications);
-  const latestAlert = notifications[0]; 
+  const setNotifications = useStore((state) => state.setNotifications)
+  const latestAlert = notifications[0];
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation();
+  const isMainPage = location.pathname === '/' || location.pathname === '/dashboard';
   const unread = notifications.filter((n) => !n.read).length
+
+  // Seed once here (not in Notifications.tsx) so the sidebar badge is
+  // correct the moment a counsellor logs in, before they've even opened
+  // the Notifications page.
+  useEffect(() => {
+    if (notifications.length === 0) setNotifications(mockNotifications)
+  }, [notifications.length, setNotifications])
 
   const handleLogout = () => {
     logout()
@@ -36,22 +48,20 @@ export function AppShell() {
       <aside className="w-60 shrink-0 border-r border-[var(--color-border)] bg-white/40 flex flex-col">
         <div className="px-5 py-6 flex items-center gap-2">
           <img src="/aurevia-logo.png" alt="Aurevia" className="h-16 w-auto object-contain" />
-          {/* Real-time Glassmorphism Alert Toast */}
-      {latestAlert && !latestAlert.read && (
-        <div className="fixed bottom-6 right-6 z-50 animate-bounce">
-          <div className="bg-gray-900/60 backdrop-blur-md border border-gray-600/50 shadow-2xl text-white p-5 rounded-2xl">
-            <div className="flex items-center gap-3">
-              <span className="flex h-3 w-3 rounded-full bg-red-500"></span>
-              <p className="font-bold text-red-400">Emergency Escalation</p>
+          
+          {/* Minimalist Bottom-Center Pill Alert */}
+          {isMainPage && latestAlert && !latestAlert.read && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
+              <div className="flex items-center gap-2.5 bg-white/60 backdrop-blur-md border border-red-400/40 shadow-[0_4px_20px_rgba(239,68,68,0.15)] px-4 py-2 rounded-full w-max max-w-[450px]">
+                <span className="flex h-2 w-2 shrink-0 rounded-full bg-red-600 animate-pulse shadow-[0_0_5px_rgba(220,38,38,0.8)]"></span>
+                <p className="text-xs font-semibold text-red-950 truncate">
+                  <span className="font-bold mr-1 text-red-700">Alert:</span>
+                  {latestAlert.message || 'Immediate review required.'}
+                </p>
+              </div>
             </div>
-            <p className="text-sm mt-2 text-gray-200">
-              {latestAlert.message || 'A new high-risk case requires immediate review.'}
-            </p>
-          </div>
+          )}
         </div>
-      )}
-        </div>
-
         <nav className="flex-1 px-3 flex flex-col gap-1">
           {NAV_ITEMS.filter((item) => user?.role && item.roles.includes(user.role)).map(({ to, label, icon: Icon }) => (
             <NavLink

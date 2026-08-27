@@ -1,15 +1,18 @@
-import { useState } from 'react'
 import { Send, MessageCircle, Smartphone, Mail } from 'lucide-react'
-import { mockNotifications, type NotificationItem } from '../data/mockUsers'
 import { tierMeta } from '../data/mockCases'
+import { useStore } from '../store/useStore'
 
 const channelIcon = { websocket: Send, telegram: MessageCircle, fcm: Smartphone, email: Mail }
 const channelLabel = { websocket: 'Live dashboard', telegram: 'Telegram', fcm: 'Push notification', email: 'Email' }
 
 export function Notifications() {
-  const [items, setItems] = useState<NotificationItem[]>(mockNotifications)
+  // Same store the sidebar badge (AppShell) reads its unread count from —
+  // previously this page held its own separate copy, so the badge was
+  // always stuck at 0 no matter what showed here. Seeding happens once in
+  // AppShell, since that mounts for every protected page, not just this one.
+  const items = useStore((s) => s.notifications)
+  const markAllRead = useStore((s) => s.markAllNotificationsRead)
 
-  const markAllRead = () => setItems((prev) => prev.map((n) => ({ ...n, read: true })))
   const unreadCount = items.filter((n) => !n.read).length
 
   return (

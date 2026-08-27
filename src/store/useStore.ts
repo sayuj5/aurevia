@@ -1,19 +1,18 @@
 import { create } from 'zustand'
-import type { CaseRecord, Tier } from '../data/mockCases'
+import type { CaseRecord } from '../data/mockCases'
 import type { NotificationItem } from '../data/mockUsers'
 
-type AuthRole = 'counselor' | 'police' | 'admin' | 'citizen' | null
+type AuthRole = 'counselor' | 'police' | 'citizen' | null
 
 interface AuthUser {
   email: string
-  name: string
   role: AuthRole
 }
 
 interface CaseSlice {
   cases: CaseRecord[]
   setCases: (cases: CaseRecord[]) => void
-  updateCaseRisk: (caseId: string, newScore: number, tier?: Tier) => void
+  updateCaseRisk: (caseId: string, newScore: number, tier?: CaseRecord['tier']) => void
   updateCaseStatus: (caseId: string, status: CaseRecord['status']) => void
   updateCaseAssignee: (caseId: string, assignedTo: string) => void
 }
@@ -33,7 +32,7 @@ interface AuthSessionSlice {
 }
 
 const normalizeRole = (role: string): Exclude<AuthRole, null> | null => {
-  if (role === 'counselor' || role === 'police' || role === 'admin' || role === 'citizen') return role
+  if (role === 'counselor' || role === 'police' || role === 'citizen') return role
   return null
 }
 
@@ -76,9 +75,9 @@ export const useStore = create<AppStoreState>((set) => ({
       notifications: state.notifications.map((n) => ({ ...n, read: true })),
     })),
 
-    login: (email, role) =>
+  login: (email, role) =>
     set({
-      user: { email, name: email.split('@')[0], role: normalizeRole(role) },
+      user: { email, role: normalizeRole(role) },
       isAuthenticated: true,
     }),
 
